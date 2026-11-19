@@ -1,0 +1,6 @@
+{
+  "name": "انجمن علمی مهندسی کامپیوتر دانشگاه قم",
+  "description": "پنج کانسپت طراحی برای وب‌سایت رسمی انجمن علمی مهندسی کامپیوتر دانشگاه قم شامل معرفی انجمن، شورای مرکزی، اسپانسر ویژه 9craft، ابزارهای دانشجویی و لینک‌های مفید.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

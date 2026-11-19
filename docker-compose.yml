@@ -1,0 +1,15 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: qom-ce-association
+    ports:
+      - "${PORT:-8080}:80"
+    restart: unless-stopped
+    mem_limit: 64m
+    cpus: "0.25"
+    read_only: true
+    tmpfs:
+      - /var/cache/nginx:size=16m
+      - /var/run:size=4m
