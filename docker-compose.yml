@@ -4,8 +4,6 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: qom-ce-association
-    ports:
-      - "${PORT:-8080}:80"
     restart: unless-stopped
     mem_limit: 64m
     cpus: "0.25"
@@ -13,3 +11,8 @@ services:
     tmpfs:
       - /var/cache/nginx:size=16m
       - /var/run:size=4m
+    networks: [web]
+
+networks:
+  web:
+    external: true

@@ -43,18 +43,14 @@
 6. **(اختیاری اما بسیار کاربردی) آپدیت خودکار با هر Push روی گیتهاب:**
    - گزینه **Automatic updates** را روشن کنید.
    - می‌توانید روی **Polling** (مثلاً هر `5m`) بگذارید تا Portainer خودش تغییرات گیتهاب را چک و بیلد مجدد کند، یا گزینه **Webhook** را انتخاب کنید و لینک Webhook را در تنظیمات گیتهاب (`Settings > Webhooks`) قرار دهید.
-7. **(اختیاری) تغییر پورت اجرا:**
-   - به صورت پیش‌فرض سایت روی پورت `8080` بالا می‌آید. اگر می‌خواهید پورت دیگری (مثلاً `3005` یا `80`) باشد، در بخش **Environment variables** روی **Add an environment variable** بزنید:
-     - Name: `PORT`
-     - Value: `8080` (یا پورت دلخواه شما)
+7. **پیش‌نیاز شبکه داکر (`web`):**
+   - فایل `docker-compose.yml` به شبکه خارجی `web` متصل است (مناسب برای Reverse Proxy مثل Nginx Proxy Manager، Caddy یا Traefik). مطمئن شوید شبکه `web` در Portainer (بخش **Networks**) وجود دارد؛ در غیر این صورت یک‌بار آن را بسازید (`docker network create web`).
 8. در پایین صفحه روی دکمه **Deploy the stack** کلیک کنید.
-9. Portainer به‌صورت خودکار ایمیج را از `Dockerfile` می‌سازد (بیلد اول حدود ۳۰ تا ۶۰ ثانیه زمان می‌برد) و کانتینر `qom-ce-association` را اجرا می‌کند.
+9. Portainer به‌صورت خودکار ایمیج را از `Dockerfile` می‌سازد (بیلد اول حدود ۳۰ تا ۶۰ ثانیه زمان می‌برد) و کانتینر `qom-ce-association` را داخل شبکه `web` اجرا می‌کند.
 
 ### بررسی سلامت کانتینر و اتصال به دامنه `ceqom.ir`
 - پس از پایان دیپلوی، در بخش **Containers** وضعیت `qom-ce-association` باید روی `running (healthy)` باشد.
-- با باز کردن `http://SERVER_IP:8080` سایت قابل مشاهده است.
-- برای اتصال به دامنه **`https://ceqom.ir`** با SSL رایگان:
-  - اگر از **Nginx Proxy Manager** یا **Caddy** یا **Traefik** استفاده می‌کنید، کافی است دامنه `ceqom.ir` و `www.ceqom.ir` را به `SERVER_IP:8080` (یا در شبکه مشترک داکر به `qom-ce-association:80`) فوروارد کنید و SSL (Let's Encrypt) را فعال نمایید.
+- در Reverse Proxy خود (متصل به شبکه `web`) کافی است دامنه `ceqom.ir` و `www.ceqom.ir` را به آدرس داخلی **`qom-ce-association`** و پورت **`80`** فوروارد کرده و SSL رایگان را فعال نمایید.
 
 ### روش ۲: دیپلوی سریع با Web Editor در Portainer (در صورت داشتن ایمیج آماده)
 اگر قبلاً ایمیج را روی سرور بیلد کرده‌اید (`docker build -t ceqom-web .`)، در Portainer به مسیر **Stacks > Add stack > Web editor** بروید و کد زیر را وارد کنید:
@@ -64,8 +60,6 @@ services:
   web:
     image: ceqom-web:latest
     container_name: qom-ce-association
-    ports:
-      - "8080:80"
     restart: unless-stopped
     mem_limit: 64m
     cpus: "0.25"
@@ -73,6 +67,11 @@ services:
     tmpfs:
       - /var/cache/nginx:size=16m
       - /var/run:size=4m
+    networks: [web]
+
+networks:
+  web:
+    external: true
 ```
 
 ---
@@ -80,14 +79,10 @@ services:
 ## اجرا با Docker Compose از طریق ترمینال سرور
 
 ```bash
+docker network create web 2>/dev/null || true
 git clone https://github.com/YOUR-USER/ceqom-site.git
 cd ceqom-site
 docker compose up -d --build
-```
-
-برای تغییر پورت:
-```bash
-PORT=8085 docker compose up -d --build
 ```
 
 برای بروزرسانی پس از تغییرات جدید در گیتهاب:
